@@ -7,6 +7,8 @@ int main(int argc, char *argv[]) {
 	//fp = file pointer
 	FILE *fp;
 	char frase[50];
+	int i;
+	int tamanho;
 
 	//Função usada para criar um arquivo ou abrir um arquivo existente	
 	//Para trabalhar com um arquivo, a primeira operação necessária é abrir este arquivo
@@ -23,14 +25,22 @@ int main(int argc, char *argv[]) {
 		printf("O arquivo foi criado com sucesso...");	
 	};
 	
-	printf("Digite a frase a ser escrita no arquivo: ");
+	printf("\nDigite a frase a ser escrita no arquivo: ");
 	gets(frase);
 	//scanf("%s", palavra); // "%s" armazena dados do tipo string
 	
 	//Gravando dados em arquivos
 	//Para isso, usa-se a função fprint
 	//Sintaxe: fprint(nomeDoPonteiroParaOArquivo, "%s", variavel_string);
-	fprint(fp, "%s", palavra);
+	//fprint(fp, "%s", palavra);
+	
+	//verificando a quantidade de caracteres da string frase
+	tamanho = strlen(frase);
+	
+	//gravando caracter por caracter
+	for(i = 0; i < tamanho; i++) {
+		fputc(frase[i], fp);
+	}
 	
 	//Fechando arquivo
 	fclose(fp);
