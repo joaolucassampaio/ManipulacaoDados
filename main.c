@@ -1,53 +1,142 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+void menu() {
+    printf("Bem vindo(a) ao Sistema de Arquivamento de Tarefas!");
+    printf("\nEm que posso ajudar hoje?");
+    printf("\n1. Inserir nova tarefa;");
+    printf("\n2. Consultar tarefas registradas;");
+    printf("\n3. Consultar tarefas do dia;");
+    printf("\n4. Sair.");
+    printf("\nDigite alguma opcao do menu: ");
+}
+
+char *criarTarefa() {
+    char dataTarefa[20];
+    char descricaoTarefa[100];
+    static char textoFinal[200];
+    
+    printf("Informe a data da tarefa (dd/mm/aaaa): ");
+    scanf("%s", dataTarefa);
+    
+    printf("Informe uma descricao para a tarefa: ");
+    scanf(" %[^\n]", descricaoTarefa);
+    
+    strcpy(textoFinal, dataTarefa);
+    strcat(textoFinal, " - ");
+    strcat(textoFinal, descricaoTarefa);
+    
+    return textoFinal;
+}
+
+void inserirTarefa(char *tarefa) {
+    FILE *fp;
+    fp = fopen("arquivo.txt", "a+");
+    
+    if(fp == NULL) {
+        printf("Erro ao abrir o arquivo, tente novamente.");
+        exit(1);
+    }
+    
+    fprintf(fp, "%s\n", tarefa);
+    fclose(fp);
+    
+    printf("Tarefa adicionada: %s", tarefa);
+}
+
+void consultarTarefas() {
+    FILE *fp;
+    char linha[200];
+    
+    fp = fopen("arquivo.txt", "r");
+    
+    if(fp == NULL) {
+        printf("Erro ao abrir o arquivo, tente novamente.");
+        exit(1);
+    }
+    
+    printf("Tarefas registradas:\n");
+    while (fgets(linha, sizeof(linha), fp) != NULL) {
+        printf("%s", linha);
+    }
+
+    fclose(fp);
+}
+
+void consultarTarefasDoDia() {
+    FILE *fp;
+    char linha[200];
+    
+    struct tm *dataHoraAtual;
+    time_t segundos;
+    time(&segundos);
+    dataHoraAtual = localtime(&segundos);
+    
+    fp = fopen("arquivo.txt", "r");
+    if(fp == NULL) {
+        printf("Erro ao abrir o arquivo, tente novamente.");
+        exit(1);
+    }
+    
+    printf("Tarefas do dia:\n");
+    char dia[3], mes[3], ano[5];
+    sprintf(dia, "%02d", dataHoraAtual->tm_mday);
+    sprintf(mes, "%02d", dataHoraAtual->tm_mon + 1);
+    sprintf(ano, "%04d", dataHoraAtual->tm_year + 1900);
+    
+    char dataAtual[11];
+    snprintf(dataAtual, sizeof(dataAtual), "%s/%s/%s", dia, mes, ano);
+    
+    while (fgets(linha, sizeof(linha), fp) != NULL) {
+        if (strncmp(linha, dataAtual, 10) == 0) {
+            printf("%s", linha);
+        }
+    }
+    fclose(fp);
+}
 
 int main(int argc, char *argv[]) {
-	//Ponteiro para arquivo
-	//O tipo FILE está definido na biblioteca stdio.h
-	//fp = file pointer
-	FILE *fp;
-	char frase[50];
-	int i;
-	int tamanho;
-
-	//Função usada para criar um arquivo ou abrir um arquivo existente	
-	//Para trabalhar com um arquivo, a primeira operação necessária é abrir este arquivo
-	//Sintaxe de abertura de arquivo: <ponteiro> = fopen("nome do arquivo", "tipo de abertura");
-	//fp = fopen(const char filename,const char mode);
-	fp = fopen("arquivo.txt", "w"); //Abrindo o arquivo
-	
-	//Verificação de problemas na abertura:
-	//Quando o arquivo não pode ser aberto, a função fopen retorna o valor NULL
-	if(fp == NULL){
-		printf("Erro ao abrir o arquivo. Por favor, tente novamente.");
-		exit(1);
-	}else {
-		printf("O arquivo foi criado com sucesso...");	
-	};
-	
-	printf("\nDigite a frase a ser escrita no arquivo: ");
-	gets(frase);
-	//scanf("%s", palavra); // "%s" armazena dados do tipo string
-	
-	//Gravando dados em arquivos
-	//Para isso, usa-se a função fprint
-	//Sintaxe: fprint(nomeDoPonteiroParaOArquivo, "%s", variavel_string);
-	//fprint(fp, "%s", palavra);
-	
-	//verificando a quantidade de caracteres da string frase
-	tamanho = strlen(frase);
-	
-	//gravando caracter por caracter
-	for(i = 0; i < tamanho; i++) {
-		fputc(frase[i], fp);
-	}
-	
-	//Fechando arquivo
-	fclose(fp);
-	
-	printf("Dados gravados com sucesso!");
-	
-	
-	
-	return 0;
+    int opcao;
+    char *tarefa;
+    menu();
+    
+    do {
+        scanf("%d", &opcao);
+        printf("\n\n");
+        
+        switch(opcao){
+            case 1:
+                tarefa = criarTarefa();
+                inserirTarefa(tarefa);
+                printf("\n\nDigite alguma opcao do menu: ");
+                break;
+            
+            case 2:
+                consultarTarefas();
+                printf("\nDigite alguma opcao do menu: ");
+                break;
+            
+            case 3:
+                consultarTarefasDoDia();
+                printf("\nDigite alguma opcao do menu: ");
+                break;
+            
+            case 4:
+                break;
+            
+            default:
+                printf("Opcao invalida, tente novamente.\n\n\n");
+                printf("Digite alguma opcao do menu: ");
+                break;
+        }
+                
+    } while (opcao != 4);
+    
+    system("cls");
+    printf("Programa encerrado com sucesso!");
+    
+    return 0;
 }
+
